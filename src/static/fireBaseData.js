@@ -1,5 +1,5 @@
 // Import Firebase modules (ensure you've installed Firebase SDK and initialized Firebase)
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 
 // Your Firebase project configuration
@@ -16,19 +16,26 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
-// Function to fetch data from Firestore
+// Function to fetch all data from Firestore collection
 export async function fetchAircraftData() {
     try {
-        const docRef = doc(db, "vehicles", "F-22"); // Fetch document by ID
-        const docSnap = await getDoc(docRef);
+        const colRef = collection(db, "vehicles"); // Reference to the "vehicles" collection
+        const querySnapshot = await getDocs(colRef);
 
-        if (docSnap.exists()) {
-            console.log("Aircraft data:", docSnap.data());
-            return docSnap.data();
+        // Map through the documents and return their data
+        const aircraftData = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        if (aircraftData.length > 0) {
+            //console.log("Aircraft data:", aircraftData);
+            return aircraftData; // Return all documents in the collection
         } else {
-            console.log("No such aircraft found!");
+            console.log("No aircraft data found!");
+            return [];
         }
     } catch (error) {
-        console.error("Error retrieving aircraft by ID: ", error);
+        console.error("Error retrieving aircraft data: ", error);
     }
 }

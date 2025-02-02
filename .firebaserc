@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "infosync-81e06"
+  },
+  "targets": {},
+  "etags": {
+    "infosync-81e06": {
+      "extensionInstances": {}
+    }
+  },
+  "dataconnectEmulatorConfig": {}
+}

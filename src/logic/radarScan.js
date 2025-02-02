@@ -1,4 +1,3 @@
-import { myGeoJSON } from "./myAirCraft";
 import { geodata } from "../static/globalGeoJSON";
 import { sendRadarTracks } from "./syncData";
 
@@ -16,8 +15,8 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 
 // Function to filter pings within 2 miles of the myGeoJSON location and send to Firestore
-export async function filterPingsAndSendToFirestore() {
-    const myCoordinates = myGeoJSON.features[0].geometry.coordinates;
+export async function filterPingsAndSendToFirestore(myAircraftData) {
+    const myCoordinates = myAircraftData.features[0].geometry.coordinates;
     const myLat = myCoordinates[1];
     const myLon = myCoordinates[0];
     
@@ -29,9 +28,13 @@ export async function filterPingsAndSendToFirestore() {
 
         // Calculate the distance between the ping and the myGeoJSON location
         const distance = haversine(myLat, myLon, pingLat, pingLon);
+
+        if (distance <= myAircraftData.features[0].properties.aircraftData.radar_radius) {
+            ping.properties.detectorId = myAircraftData.features[0].properties.id;  // Add the detectorId to properties
+        }
         
         // Return true if the distance is less than or equal to 2 miles
-        return distance <= 2;
+        return distance <= myAircraftData.features[0].properties.aircraftData.radar_radius;
     });
 
     sendRadarTracks(inRangePings);
@@ -42,6 +45,3 @@ export async function filterPingsAndSendToFirestore() {
         features: inRangePings
     };
 }
-
-// Example usage:
-export const radarScan = await filterPingsAndSendToFirestore();

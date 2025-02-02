@@ -1,7 +1,7 @@
 import mapboxgl from 'mapbox-gl'
 import jeticon from '../assets/icons/output.png';
 
-export function generateMap(mapRef, mapContainerRef, initCenter, sources) {
+export function generateMap(mapRef, mapContainerRef, initCenter, sources, radarRadius) {
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VuZXJhbGc4cnUiLCJhIjoiY202am1iYXZ2MDJnZjJscG9qZTlxZ2V3MSJ9._h8vg764DgWQWvxy8WgpRQ'
 
     // Define the max bounds (expanded slightly to prevent zoom snapping)
@@ -129,7 +129,7 @@ export function generateMap(mapRef, mapContainerRef, initCenter, sources) {
             source: 'my-aircraft',
             paint: {
                 'circle-radius': 0,
-                'circle-stroke-width': 100,
+                'circle-stroke-width': (radarRadius*50),
                 "circle-emissive-strength": 1,
                 'circle-stroke-opacity': 0.1,
                 'circle-stroke-color': 'rgba(255, 0, 0, 1)',
@@ -142,7 +142,7 @@ export function generateMap(mapRef, mapContainerRef, initCenter, sources) {
             source: 'friendlies',
             paint: {
                 'circle-radius': 0,
-                'circle-stroke-width': 100,
+                'circle-stroke-width': ["*", ["get", "radar_radius", ["get", "aircraftData"]], 50],
                 "circle-emissive-strength": 1,
                 'circle-stroke-opacity': 0.2,
                 'circle-stroke-color': 'rgb(145, 0, 249)',

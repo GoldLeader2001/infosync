@@ -1,6 +1,5 @@
-import { doc, collection, setDoc, getDocs, query, where, deleteDoc } from "firebase/firestore";
+import { doc, collection, setDoc, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "../static/fireBaseData";
-import { myGeoJSON } from "./myAirCraft";
 
 export async function sendRadarTracks(inRangePings) {
     // Send each ping as its own document to Firestore
@@ -47,6 +46,7 @@ export async function sendCurPos(myAircraftData) {
 
 export async function fetchFriendlies(myAircraftData) {
     try {
+        console.log(myAircraftData);
         const myId = myAircraftData.features[0].properties.id;
         const friendliesCollection = collection(db, "reality");
         const snapshot = await getDocs(friendliesCollection);
@@ -62,31 +62,31 @@ export async function fetchFriendlies(myAircraftData) {
         return { type: "FeatureCollection", features: [] }; // Return an empty GeoJSON collection in case of error
     }
 }
-export const friendlies = fetchFriendlies(myGeoJSON);
+//export const friendlies = fetchFriendlies(myGeoJSON);
 
-
+//API call when user leaves the site
 export async function removeAircraft(targetId) {
+    const url = "https://removeaircraft-dfimopxyya-uc.a.run.app";
+    const data = JSON.stringify({ targetId });
+
+    const blob = new Blob([data], { type: "application/json" });
+    navigator.sendBeacon(url, blob);
+}
+
+export async function removeRadarScan(aircraftData) {
     try {
-        const realityCollection = collection(db, "reality");
+        const detectorId = aircraftData.features[0].properties.id; // Get the aircraft's ID
+        const tracksCollection = collection(db, "tracks"); 
+        const snapshot = await getDocs(tracksCollection);
 
-        // Query documents where properties.id matches targetId
-        const q = query(realityCollection, where("properties.id", "==", targetId));
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-            console.log(`No documents found with properties.id: ${targetId}`);
-            return;
-        }
-
-        // Delete each matching document
-        const deletePromises = snapshot.docs.map((docSnapshot) =>
-            deleteDoc(doc(db, "reality", docSnapshot.id))
-        );
+        // Iterate through documents and delete matching ones
+        const deletePromises = snapshot.docs
+            .filter(doc => doc.data().properties?.detectorId === detectorId)
+            .map(doc => deleteDoc(doc.ref));
 
         await Promise.all(deletePromises);
-
-        console.log(`Deleted ${snapshot.size} documents with properties.id: ${targetId}`);
+        console.log(`Removed radar scans detected by aircraft ID: ${detectorId}`);
     } catch (error) {
-        console.error("Error deleting documents:", error);
+        console.error("Error removing radar scans from Firestore:", error);
     }
 }

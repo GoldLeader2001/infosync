@@ -12,10 +12,11 @@ The goal is to minimize the backend's involvement, relying on a lightweight syst
 
 ## TODOS
 * Make sure visible radar corresponds to detection radius algorithm's range (this will probably be easiest to do if we get movement working, and will be more important if we add additional aircraft)
-* tracks sent to firestore should be removed when the "aircraft"s radar is out of range (on exit, on reload, ?on move?)
-    * this will require some clever engineering as the page closes before the code can delete the created documents
-* add button on page to randomly change users position
 * add functionality for arrowkey based movement (movement will have to update the radar) [possible doc](https://docs.mapbox.com/mapbox-gl-js/example/live-geojson/)
-* setup a form where users can select what type of aircraft they want? also add factions?
+* add factions (this will be expanded upon)
+* add different layer symbols depending on vehicle type
+* fix layers overlapping and changing the colors of pings (local radar pings should take priority)
+* fix naming inconsistencies
+* work on code readability
 
 
