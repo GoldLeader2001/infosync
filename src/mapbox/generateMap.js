@@ -92,35 +92,27 @@ export function generateMap(mapRef, mapContainerRef, initCenter, sources, radarR
         )
 
         mapRef.current.addLayer({
-            id: 'tracks_layer',
-            type: 'circle',
-            source: 'tracks',
-            paint: {
-                'circle-radius': 4,
-                'circle-stroke-width': 2,
-                "circle-emissive-strength": 1,
-                'circle-color': 'green',
-                'circle-blur': 0.5,
-                'circle-opacity': 0.8,
-                'circle-stroke-color': 'rgba(0, 255, 0, 1)',
-            },
-            emissive_strength: 1
-        });
-
-        mapRef.current.addLayer({
             id: 'synced_tracks_layer',
             type: 'circle',
             source: 'syncedTracks',
             paint: {
                 'circle-radius': 4,
-                'circle-stroke-width': 2,
                 "circle-emissive-strength": 1,
                 'circle-color': 'rgb(54, 199, 210)',
-                'circle-blur': 0.5,
-                'circle-opacity': 0.8,
-                'circle-stroke-color': 'rgb(54, 199, 210)',
+                'circle-opacity': 1
+            }
+        });
+
+        mapRef.current.addLayer({
+            id: 'tracks_layer',
+            type: 'circle',
+            source: 'tracks',
+            paint: {
+                'circle-radius': 4,
+                "circle-emissive-strength": 1,
+                'circle-color': 'rgb(0, 255, 0)',
+                'circle-opacity': 1,
             },
-            emissive_strength: 1
         });
 
         mapRef.current.addLayer({

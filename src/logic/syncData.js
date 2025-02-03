@@ -1,17 +1,22 @@
-import { doc, collection, setDoc, getDocs, deleteDoc } from "firebase/firestore";
+import { doc, collection, setDoc, getDocs, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../static/fireBaseData";
 
 export async function sendRadarTracks(inRangePings) {
-    // Send each ping as its own document to Firestore
     for (const ping of inRangePings) {
-        const pingId = `${ping.geometry.coordinates[0]}_${ping.geometry.coordinates[1]}`; // Create a unique ID based on coordinates
-        const trackRef = doc(collection(db, "tracks"), pingId); // Create a document reference in the "tracks" collection
+        const pingId = `${ping.geometry.coordinates[0]}_${ping.geometry.coordinates[1]}`; // Unique ID based on coordinates
+        const trackRef = doc(collection(db, "tracks"), pingId); // Create a document reference
 
         try {
-            await setDoc(trackRef, ping); // Send the ping data to Firestore
+            const existingDoc = await getDoc(trackRef); // Check if the document exists
+            if (existingDoc.exists()) {
+                console.log(`Ping at ${ping.geometry.coordinates} already exists in Firestore.`);
+                continue; // Skip adding this document
+            }
+
+            await setDoc(trackRef, ping); // Add the new ping
             console.log(`Ping at ${ping.geometry.coordinates} successfully added to Firestore.`);
         } catch (error) {
-            console.error("Error adding ping to Firestore: ", error);
+            console.error("Error checking/adding ping to Firestore:", error);
         }
     }
 }
