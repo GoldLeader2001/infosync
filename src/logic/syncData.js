@@ -51,7 +51,6 @@ export async function sendCurPos(myAircraftData) {
 
 export async function fetchFriendlies(myAircraftData) {
     try {
-        console.log(myAircraftData);
         const myId = myAircraftData.features[0].properties.id;
         const friendliesCollection = collection(db, "reality");
         const snapshot = await getDocs(friendliesCollection);

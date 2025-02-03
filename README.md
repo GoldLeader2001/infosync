@@ -13,10 +13,11 @@ The goal is to minimize the backend's involvement, relying on a lightweight syst
 ## TODOS
 * Make sure visible radar corresponds to detection radius algorithm's range (this will probably be easiest to do if we get movement working, and will be more important if we add additional aircraft)
     * Once we have proper movement setup we will be able to gauge the accuracy of our radii calculations
-* Add functionality for arrowkey based movement (movement will have to update the radar) [possible doc](https://docs.mapbox.com/mapbox-gl-js/example/live-geojson/)
-    * This shouldnt be too difficult as we should be able to reuse some of the code that randomly assigns the vehicles coordinates
-    * This will not move smoothly (right now) this will move the vehicle in steps, the distance of those steps are determined by the vehicles speed
-* Add factions (this will be expanded upon)
+* Add functionality for arrowkey/button based movement (movement will have to update the radar) [possible doc](https://docs.mapbox.com/mapbox-gl-js/example/live-geojson/)
+    * ~~This shouldnt be too difficult as we should be able to reuse some of the code that randomly assigns the vehicles coordinates~~
+    * ~~This will not move smoothly (right now) this will move the vehicle in steps, the distance of those steps are determined by the vehicles speed~~
+    * Implement speed based movement distance.
+* Add factions
     * There will be two factions (US and NDEF) each faction will have it's own subset of available vehicles the faction and vehicle will be chosen on the entry form
     * You will only be able to see pings from your own faction
     * Detected enemy aircraft will show up as pings not an aircraft (Yet, we may implement a functionality to simulate more realistic radar)
@@ -38,5 +39,6 @@ The goal is to minimize the backend's involvement, relying on a lightweight syst
 * ~~Sometimes overlapping pings aren't removed (Solution: radarscan on change?)~~
 * ~~Synced pings and radar ping layers are overlapping and changing the colors of pings (local radar pings should take priority)~~
 * Fix naming inconsistencies (example: aircraft vs airCraft)
+* Calls to Firestore need to be optimized
 
 

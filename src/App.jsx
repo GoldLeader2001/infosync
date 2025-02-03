@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getInitialGeoJSON, resetLocation } from './logic/myAirCraft';
+import { getInitialGeoJSON, resetLocation, moveAircraft } from './logic/myAirCraft';
 import { filterPingsAndSendToFirestore } from './logic/radarScan';
 import { fetchFriendlies, fetchSyncedTracks, removeAircraft, removeRadarScan, sendCurPos } from './logic/syncData';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -17,7 +17,7 @@ function App() {
     const [selectedOption, setSelectedOption] = useState('');
     const [showMap, setShowMap] = useState(false);
     const [options, setOptions] = useState([]);
-    const [ myAircraftData, setMyAircraftData ] = useState();
+    const [myAircraftData, setMyAircraftData] = useState();
 
     // Fetch aircraft data asynchronously
     useEffect(() => {
@@ -43,12 +43,20 @@ function App() {
         setMyAircraftData(getInitialGeoJSON(event.target.value));
     };
 
-    const changePos = async () => {
+    const changePos = async (label) => {
         const resolvedAircraftData = await myAircraftData
-        const newPosition = resetLocation(resolvedAircraftData);
-        removeRadarScan(resolvedAircraftData);
-        await setMyAircraftData(newPosition);
-        sendCurPos(newPosition);
+
+        if(label === "Reset") {
+            const newPosition = resetLocation(resolvedAircraftData);
+            removeRadarScan(resolvedAircraftData);
+            await setMyAircraftData(newPosition);
+            sendCurPos(newPosition);
+        } else {
+            const newPosition = moveAircraft(label, resolvedAircraftData);
+            removeRadarScan(resolvedAircraftData);
+            await setMyAircraftData(newPosition);
+            sendCurPos(newPosition);
+        }
     }
 
     useEffect(() => {
@@ -92,12 +100,9 @@ function App() {
                         }
                     });
                 };
-
-                const unsubscribeTracks = listenForChanges("tracks");
                 const unsubscribeReality = listenForChanges("reality");
 
                 return () => {
-                    unsubscribeTracks();
                     unsubscribeReality();
                 };
 
@@ -170,8 +175,20 @@ function App() {
             )}
             {showMap && (
                 <>
-                    <button className="reset-button" onClick={() => changePos()}>Reset</button>
                     <div id="map-container" ref={mapContainerRef} />
+                    <Box sx={{ position: 'absolute', bottom: 20, left: 20, display: 'grid', gridTemplateColumns: 'repeat(3, 50px)', gridTemplateRows: 'repeat(3, 50px)', gap: '5px', backgroundColor: 'rgba(128, 128, 128, 0.5)', padding: '10px', borderRadius: '10px' }}>
+                        {['↖', '↑', '↗', '←', 'Reset', '→', '↙', '↓', '↘'].map((label, index) => (
+                            <Button key={index} variant="contained" sx={{ backgroundColor: 'rgba(128, 128, 128, 0.7)', color: 'white', minWidth: '50px', height: '50px' }} onClick={() => changePos(label)}>
+                                {label}
+                            </Button>
+                        ))}
+                    </Box>
+                    <Box sx={{ position: 'absolute', top: 20, right: 20, backgroundColor: 'rgba(0, 0, 0, 0)', padding: '10px', borderRadius: '5px' }}>
+                        <Typography variant="body1" sx={{ color: 'rgb(145, 0, 249)' }}>● Friendly Aircraft</Typography>
+                        <Typography variant="body1" sx={{ color: 'rgba(255, 0, 0, 1)' }}>● Your Aircraft</Typography>
+                        <Typography variant="body1" sx={{ color: 'rgb(0, 255, 0)' }}>● Your Tracks</Typography>
+                        <Typography variant="body1" sx={{ color: 'rgb(54, 199, 210)' }}>● Friendly Tracks</Typography>
+                    </Box>
                 </>
             )}
         </>
