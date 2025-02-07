@@ -18,7 +18,7 @@ The goal is to minimize the backend's involvement, relying on a lightweight syst
     * ~~This will not move smoothly (right now) this will move the vehicle in steps, the distance of those steps are determined by the vehicles speed~~
     * Implement speed based movement distance.
 * Add factions
-    * There will be two factions (US and NDEF) each faction will have it's own subset of available vehicles the faction and vehicle will be chosen on the entry form
+    * ~~There will be two factions (US and NDEF) each faction will have it's own subset of available vehicles the faction and vehicle will be chosen on the entry form~~
     * You will only be able to see pings from your own faction
     * Detected enemy aircraft will show up as pings not an aircraft (Yet, we may implement a functionality to simulate more realistic radar)
     * Static "pillboxes" will belong to a mix of both the US and NDEF (they will also have bearing radar with a large radius, this will not detect enemy "pillboxes")
@@ -40,5 +40,8 @@ The goal is to minimize the backend's involvement, relying on a lightweight syst
 * ~~Synced pings and radar ping layers are overlapping and changing the colors of pings (local radar pings should take priority)~~
 * Fix naming inconsistencies (example: aircraft vs airCraft)
 * Calls to Firestore need to be optimized
+    * ~~Moving the aircraft tries to delete it's tracks even if it has none~~
+    * Check if prod is having useEffect run twice
+    * When an aircraft moves it removes the DB tracks before it does another scan
 
 

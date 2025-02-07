@@ -16,6 +16,20 @@ function haversine(lat1, lon1, lat2, lon2) {
 
 // Function to filter pings within 2 miles of the myGeoJSON location and send to Firestore
 export async function filterPingsAndSendToFirestore(myAircraftData) {
+    const inRangePings = radarScan(myAircraftData);
+    if(inRangePings.length != 0)
+         
+        sendRadarTracks(inRangePings);
+
+        // Return a new GeoJSON object with the filtered pings
+        return {
+            type: "FeatureCollection",
+            features: inRangePings
+        };
+}
+
+// Function to filter pings within 2 miles of the myGeoJSON location and send to Firestore
+export function radarScan(myAircraftData) {
     const myCoordinates = myAircraftData.features[0].geometry.coordinates;
     const myLat = myCoordinates[1];
     const myLon = myCoordinates[0];
@@ -37,11 +51,5 @@ export async function filterPingsAndSendToFirestore(myAircraftData) {
         return distance <= myAircraftData.features[0].properties.aircraftData.radar_radius;
     });
 
-    sendRadarTracks(inRangePings);
-
-    // Return a new GeoJSON object with the filtered pings
-    return {
-        type: "FeatureCollection",
-        features: inRangePings
-    };
+    return inRangePings
 }
