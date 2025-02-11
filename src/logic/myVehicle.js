@@ -13,8 +13,8 @@ function generateRandomCoordinates(latMin, latMax, lonMin, lonMax) {
     return [randomLon, randomLat]; // Return in [longitude, latitude] format
 }
 
-// Function to fetch aircraft data and create GeoJSON
-export async function getInitialGeoJSON(aircraftData) {
+// Function to fetch vehicle data and create GeoJSON
+export async function getInitialGeoJSON(vehicleData) {
     const randomCoordinates = generateRandomCoordinates(latMin, latMax, lonMin, lonMax);
 
     return {
@@ -22,7 +22,7 @@ export async function getInitialGeoJSON(aircraftData) {
         "features": [
             {
                 "type": "Feature",
-                "properties": { aircraftData, id: uuidv4() },
+                "properties": { vehicleData, id: uuidv4() },
                 "geometry": {
                     "type": "Point",
                     "coordinates": randomCoordinates // Use the random coordinates
@@ -44,7 +44,7 @@ export function resetLocation(myGeoJSON) {
 }
 
 // Function to reset location (randomize coordinates and return updated GeoJSON)
-export function moveAircraft(label, myGeoJSON) {
+export function moveVehicle(label, myGeoJSON) {
     const curLon = myGeoJSON.features[0].geometry.coordinates[0]
     const curLat = myGeoJSON.features[0].geometry.coordinates[1]
 

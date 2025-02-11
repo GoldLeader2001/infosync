@@ -11,27 +11,29 @@ The goal is to minimize the backend's involvement, relying on a lightweight syst
 * Mapbox GL (this is the map generation and interaction tool we will be using) [Docs](https://docs.mapbox.com/#maps)
 
 ## TODOS
-* Make sure visible radar corresponds to detection radius algorithm's range (this will probably be easiest to do if we get movement working, and will be more important if we add additional aircraft)
-    * Once we have proper movement setup we will be able to gauge the accuracy of our radii calculations
+* ~~Make sure visible radar corresponds to detection radius algorithm's range (this will probably be easiest to do if we get movement working, and will be more important if we add additional aircraft)~~
+    * ~~Once we have proper movement setup we will be able to gauge the accuracy of our radii calculations~~
 * Add functionality for arrowkey/button based movement (movement will have to update the radar) [possible doc](https://docs.mapbox.com/mapbox-gl-js/example/live-geojson/)
     * ~~This shouldnt be too difficult as we should be able to reuse some of the code that randomly assigns the vehicles coordinates~~
     * ~~This will not move smoothly (right now) this will move the vehicle in steps, the distance of those steps are determined by the vehicles speed~~
     * Implement speed based movement distance.
 * Add factions
-    * There will be two factions (US and NDEF) each faction will have it's own subset of available vehicles the faction and vehicle will be chosen on the entry form
-    * You will only be able to see pings from your own faction
-    * Detected enemy aircraft will show up as pings not an aircraft (Yet, we may implement a functionality to simulate more realistic radar)
-    * Static "pillboxes" will belong to a mix of both the US and NDEF (they will also have bearing radar with a large radius, this will not detect enemy "pillboxes")
-* Add different layer symbols depending on vehicle type
-    * This is slightly complex as you cannot just use a standard PNG you have to convert it to a SDF enabled image first so MapBox can use it
-    * Each vehicle should have a unique symbol that resembles it shape (i.e. F-35 vs Q-53)
+    * ~~There will be two factions (US and NDEF) each faction will have it's own subset of available vehicles the faction and vehicle will be chosen on the entry form~~
+    * ~~You will only be able to see pings from your own faction~~
+    * ~~Detected enemy aircraft will show up as pings not an aircraft (Yet, we may implement a functionality to simulate more realistic radar)~~
+    * ~~Static "pillboxes" will belong to a mix of both the US and NDEF~~ 
+    * ~~(they will also have bearing radar with a large radius, this will not detect enemy "pillboxes")~~
+* ~~Add different layer symbols depending on vehicle type~~
+    * ~~This is slightly complex as you cannot just use a standard PNG you have to convert it to a SDF enabled image first so MapBox can use it~~
+    * ~~Each vehicle should have a unique symbol that resembles it shape (i.e. F-35 vs Q-53)~~
 * Work on code readability
     * Possibly break up the code into seperate easier to digest files
     * Modify Repeated variable names
     * Remove repeated code
     * Better comments
+    * ~~aircraft => vehicle~~
 * Style the entry form properly
-    * Form should style the whole screen
+    * ~~Form should style the whole screen~~
     * The contrast of the text needs to be increased in order to increase readability
 
 ## BUGS
@@ -40,5 +42,9 @@ The goal is to minimize the backend's involvement, relying on a lightweight syst
 * ~~Synced pings and radar ping layers are overlapping and changing the colors of pings (local radar pings should take priority)~~
 * Fix naming inconsistencies (example: aircraft vs airCraft)
 * Calls to Firestore need to be optimized
+    * ~~Moving the aircraft tries to delete it's tracks even if it has none~~
+    * Check if prod is having useEffect run twice
+    * When an aircraft moves it removes the DB tracks before it does another scan
+    * A combination of the React useEffect, Firestore Listeners, and all of the async functions is causing dupe reads
 
 

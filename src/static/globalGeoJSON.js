@@ -1,14 +1,19 @@
 //This is static data
 
-export const geodata = {
+export const globalGeodata = {
     "type": "FeatureCollection",
     "features": [
         {
             "type": "Feature",
             "properties": {
-                "type": "Aircraft",
-                "speed": "Mach 1.6",
-                "altitude": "10,000m"
+                "vehicleData": {
+                    "type": "PillBox",
+                    "faction": "NDEF",
+                    "radar_radius": 4,
+                    "radar_type": "bearing",
+                    "speed": "Mach 1.6",
+                    "altitude": "10,000m"
+                },
             },
             "geometry": {
                 "type": "Point",
@@ -21,9 +26,14 @@ export const geodata = {
         {
             "type": "Feature",
             "properties": {
-                "type": "Aircraft",
-                "speed": "Mach 1.6",
-                "altitude": "10,000m"
+                "vehicleData": {
+                    "type": "PillBox",
+                    "faction": "US",
+                    "radar_radius": 4,
+                    "radar_type": "bearing",
+                    "speed": "Mach 1.6",
+                    "altitude": "10,000m"
+                },
             },
             "geometry": {
                 "type": "Point",
@@ -36,9 +46,14 @@ export const geodata = {
         {
             "type": "Feature",
             "properties": {
-                "type": "Aircraft",
-                "speed": "Mach 1.6",
-                "altitude": "10,000m"
+                "vehicleData": {
+                    "type": "PillBox",
+                    "faction": "NDEF",
+                    "radar_radius": 4,
+                    "radar_type": "bearing",
+                    "speed": "Mach 1.6",
+                    "altitude": "10,000m"
+                },
             },
             "geometry": {
                 "type": "Point",
@@ -51,9 +66,14 @@ export const geodata = {
         {
             "type": "Feature",
             "properties": {
-                "type": "Aircraft",
-                "speed": "Mach 1.6",
-                "altitude": "10,000m"
+                "vehicleData": {
+                    "type": "PillBox",
+                    "faction": "US",
+                    "radar_radius": 4,
+                    "radar_type": "bearing",
+                    "speed": "Mach 1.6",
+                    "altitude": "10,000m"
+                },
             },
             "geometry": {
                 "type": "Point",
@@ -66,9 +86,14 @@ export const geodata = {
         {
             "type": "Feature",
             "properties": {
-                "type": "Aircraft",
-                "speed": "Mach 1.6",
-                "altitude": "10,000m"
+                "vehicleData": {
+                    "type": "PillBox",
+                    "faction": "NDEF",
+                    "radar_radius": 4,
+                    "radar_type": "bearing",
+                    "speed": "Mach 1.6",
+                    "altitude": "10,000m"
+                },
             },
             "geometry": {
                 "type": "Point",
@@ -78,9 +103,14 @@ export const geodata = {
         {
             "type": "Feature",
             "properties": {
-                "type": "Aircraft",
-                "speed": "Mach 1.6",
-                "altitude": "10,000m"
+                "vehicleData": {
+                    "type": "PillBox",
+                    "faction": "US",
+                    "radar_radius": 4,
+                    "radar_type": "bearing",
+                    "speed": "Mach 1.6",
+                    "altitude": "10,000m"
+                },
             },
             "geometry": {
                 "type": "Point",
@@ -90,9 +120,14 @@ export const geodata = {
         {
             "type": "Feature",
             "properties": {
-                "type": "Aircraft",
-                "speed": "Mach 1.6",
-                "altitude": "10,000m"
+                "vehicleData": {
+                    "type": "PillBox",
+                    "faction": "NDEF",
+                    "radar_radius": 4,
+                    "radar_type": "bearing",
+                    "speed": "Mach 1.6",
+                    "altitude": "10,000m"
+                },
             },
             "geometry": {
                 "type": "Point",
@@ -102,9 +137,14 @@ export const geodata = {
         {
             "type": "Feature",
             "properties": {
-                "type": "Aircraft",
-                "speed": "Mach 1.6",
-                "altitude": "10,000m"
+                "vehicleData": {
+                    "type": "PillBox",
+                    "faction": "US",
+                    "radar_radius": 4,
+                    "radar_type": "bearing",
+                    "speed": "Mach 1.6",
+                    "altitude": "10,000m"
+                },
             },
             "geometry": {
                 "type": "Point",

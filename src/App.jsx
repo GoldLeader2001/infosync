@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { getInitialGeoJSON, resetLocation, moveAircraft } from './logic/myAirCraft';
+import { getInitialGeoJSON, resetLocation, moveVehicle } from './logic/myVehicle';
 import { filterPingsAndSendToFirestore } from './logic/radarScan';
-import { fetchFriendlies, fetchSyncedTracks, removeAircraft, removeRadarScan, sendCurPos } from './logic/syncData';
+import { fetchFriendlyVehicle, fetchFriendlyPillboxes, fetchSyncedTracks, removeVehicle, removeRadarScan, sendCurPos } from './logic/syncData';
 import { collection, onSnapshot } from 'firebase/firestore';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './App.css';
 import { generateMap } from './mapbox/generateMap';
-import { db, fetchAircraftData } from './static/fireBaseData';
+import { db, fetchVehicleData } from './static/fireBaseData';
 import { Box, Button, MenuItem, FormControl, Select, InputLabel, Typography } from '@mui/material';
 
 const INITIAL_CENTER = [-80.16373, 26.59597];
@@ -14,96 +14,104 @@ const INITIAL_CENTER = [-80.16373, 26.59597];
 function App() {
     const mapRef = useRef(null);
     const mapContainerRef = useRef(null);
-    const [selectedOption, setSelectedOption] = useState('');
     const [showMap, setShowMap] = useState(false);
-    const [options, setOptions] = useState([]);
-    const [myAircraftData, setMyAircraftData] = useState();
-
-    // Fetch aircraft data asynchronously
-    useEffect(() => {
-        const fetchOptions = async () => {
-            try {
-                const aircraftData = await fetchAircraftData();
-                setOptions(aircraftData); // Assuming aircraftData is an array
-            } catch (error) {
-                console.error("Error fetching aircraft data:", error);
-            }
-        };
-
-        fetchOptions();
-    }, []); // Empty dependency array to run once when the component mounts
+    const [vehicleOptions, setVehicleOptions] = useState([]);
+    const factionOptions = ["US", "NDEF"]
+    const [myVehicleData, setMyVehicleData] = useState();
+    const [factionSelected, setFactionSelected] = useState('');
+    const [vehicleSelected, setVehicleSelected] = useState('');
 
     const handleFormSubmit = () => {
         // Set the selected option and show the map
         setShowMap(true);
     };
 
-    const handleOptionChange = async (event) => {
-        setSelectedOption(event.target.value);
-        setMyAircraftData(getInitialGeoJSON(event.target.value));
+    const handleFactionOptionChange = async (event) => {
+        const factionVehicle = await fetchVehicleData(event.target.value);
+        setVehicleOptions(factionVehicle);
+        setFactionSelected(event.target.value);
+    };
+
+    const handleVehicleOptionChange = async (event) => {
+        setVehicleSelected(event.target.value);
+        setMyVehicleData(getInitialGeoJSON(event.target.value));
     };
 
     const changePos = async (label) => {
-        const resolvedAircraftData = await myAircraftData
+        const resolvedVehicleData = await myVehicleData
 
-        if(label === "Reset") {
-            const newPosition = resetLocation(resolvedAircraftData);
-            removeRadarScan(resolvedAircraftData);
-            await setMyAircraftData(newPosition);
+        if (label === "Reset") {
+            removeRadarScan(resolvedVehicleData);
+            const newPosition = resetLocation(resolvedVehicleData);
+            await setMyVehicleData(newPosition);
             sendCurPos(newPosition);
         } else {
-            const newPosition = moveAircraft(label, resolvedAircraftData);
-            removeRadarScan(resolvedAircraftData);
-            await setMyAircraftData(newPosition);
+            removeRadarScan(resolvedVehicleData);
+            const newPosition = moveVehicle(label, resolvedVehicleData);
+            await setMyVehicleData(newPosition);
             sendCurPos(newPosition);
         }
     }
 
     useEffect(() => {
-        if (!showMap || !myAircraftData) return;
+        if (!showMap || !myVehicleData) return;
 
         const initializeMap = async () => {
             try {
-                const resolvedAircraftData = await myAircraftData;
-                const friendliesResult = await fetchFriendlies(resolvedAircraftData);
-                const syncedTracksResult = await fetchSyncedTracks();
-                const radarScan = await filterPingsAndSendToFirestore(resolvedAircraftData);
+                console.log('initmap')
+                const resolvedVehicleData = await myVehicleData;
+                const [friendliesResult, syncedTracksResult, aesaRadarScan, friendlyPillboxes] = await Promise.all([
+                    fetchFriendlyVehicle(resolvedVehicleData),
+                    fetchSyncedTracks(resolvedVehicleData),
+                    filterPingsAndSendToFirestore(resolvedVehicleData),
+                    fetchFriendlyPillboxes(resolvedVehicleData)
+                ]);
 
                 generateMap(mapRef, mapContainerRef, INITIAL_CENTER, [
-                    radarScan,
-                    resolvedAircraftData,
+                    aesaRadarScan,
+                    resolvedVehicleData,
                     syncedTracksResult,
                     friendliesResult,
-                ], resolvedAircraftData.features[0].properties.aircraftData.radar_radius);
+                    friendlyPillboxes
+                ], resolvedVehicleData.features[0].properties.vehicleData.radar_radius);
 
-                sendCurPos(resolvedAircraftData);
+                sendCurPos(resolvedVehicleData);
 
                 const listenForChanges = (collectionName) => {
                     const colRef = collection(db, collectionName);
                     return onSnapshot(colRef, async () => {
                         try {
-                            console.log("change detected");
+                            if (colRef.id === "tracks" && mapRef) {
+                                const syncTrackResult = await fetchSyncedTracks(resolvedVehicleData);
+                                mapRef.current.getSource('synced-tracks').setData(syncTrackResult);
+                            } else if (colRef.id === "reality" && mapRef) {
+                                console.log("change in reality collection");
+                                removeRadarScan(resolvedVehicleData);
+                                const updatedFriendlies = await fetchFriendlyVehicle(resolvedVehicleData);
+                                mapRef.current.getSource('friendly-vehicle').setData(updatedFriendlies);
 
-                            const syncTrackResult = await fetchSyncedTracks();
-                            mapRef.current.getSource('syncedTracks').setData(syncTrackResult);
+                                const curVehiclePos = resolvedVehicleData
+                                mapRef.current.getSource('my-vehicle').setData(curVehiclePos);
 
-                            const updatedFriendlies = await fetchFriendlies(resolvedAircraftData);
-                            mapRef.current.getSource('friendlies').setData(updatedFriendlies);
+                                const newRadarScan = await filterPingsAndSendToFirestore(resolvedVehicleData);
+                                mapRef.current.getSource('tracks').setData(newRadarScan);
 
-                            const curAircraftPos = resolvedAircraftData
-                            mapRef.current.getSource('my-aircraft').setData(curAircraftPos);
-
-                            const newRadarScan = await filterPingsAndSendToFirestore(resolvedAircraftData);
-                            mapRef.current.getSource('tracks').setData(newRadarScan);
+                                const newPillBoxes = await fetchFriendlyPillboxes(resolvedVehicleData);
+                                mapRef.current.getSource('friendly-pillbox').setData(newPillBoxes);
+                            } else {
+                                //console.log('try again');
+                            }
                         } catch (err) {
                             console.error("Error updating map data:", err);
                         }
                     });
                 };
                 const unsubscribeReality = listenForChanges("reality");
+                const unsubscribeTracks = listenForChanges("tracks");
 
                 return () => {
                     unsubscribeReality();
+                    unsubscribeTracks();
                 };
 
             } catch (error) {
@@ -112,12 +120,13 @@ function App() {
         };
 
         initializeMap();
-    }, [myAircraftData, showMap]);
+    }, [myVehicleData, showMap]);
 
     useEffect(() => {
         const handleBeforeUnload = async () => {
-            const resolvedAircraftData = await myAircraftData;
-            removeAircraft(resolvedAircraftData.features[0].properties.id);
+            const resolvedVehicleData = await myVehicleData;
+            console.log(resolvedVehicleData.features[0].properties.id);
+            removeVehicle(resolvedVehicleData.features[0].properties.id);
         };
 
         window.addEventListener("beforeunload", handleBeforeUnload);
@@ -125,7 +134,7 @@ function App() {
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
-    }, [myAircraftData]);
+    }, [myVehicleData]);
 
     return (
         <>
@@ -139,24 +148,41 @@ function App() {
                         backgroundColor: '#333',
                         padding: '2rem',
                         borderRadius: '8px',
-                        width: '300px',
+                        width: '100%',
+                        height: "100%",
                         margin: 'auto',
                         color: 'white'
                     }}
                 >
                     <Typography variant="h6" gutterBottom>
-                        Select an Option
+                        Pick your Vehicle
                     </Typography>
                     <FormControl fullWidth>
-                        <InputLabel id="select-option-label">Select an Option</InputLabel>
+                        <InputLabel id="select-faction-option-label">Select a Faction</InputLabel>
                         <Select
-                            labelId="select-option-label"
-                            id="select-option"
-                            value={selectedOption}
+                            id="select-faction-option"
+                            value={factionSelected}
                             label="Select an Option"
-                            onChange={handleOptionChange}
+                            onChange={handleFactionOptionChange}
+                            sx={{ marginBottom: 2 }}
                         >
-                            {options.map((option, index) => (
+                            {factionOptions.map((option, index) => (
+                                <MenuItem key={index} value={option}>
+                                    {option}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth>
+                        <InputLabel id="select-vehicle-option-label">Select a Vehicle</InputLabel>
+                        <Select
+                            id="select-vehicle-option"
+                            value={vehicleSelected}
+                            label="Select an Option"
+                            onChange={handleVehicleOptionChange}
+                            disabled={factionSelected === ''}
+                        >
+                            {vehicleOptions.map((option, index) => (
                                 <MenuItem key={index} value={option}>
                                     {option.id} {/* Assuming the option has 'id' and 'name' fields */}
                                 </MenuItem>
@@ -167,6 +193,7 @@ function App() {
                         variant="contained"
                         color="primary"
                         onClick={handleFormSubmit}
+                        disabled={vehicleSelected === ''}
                         sx={{ marginTop: '1rem' }}
                     >
                         Submit
@@ -184,8 +211,8 @@ function App() {
                         ))}
                     </Box>
                     <Box sx={{ position: 'absolute', top: 20, right: 20, backgroundColor: 'rgba(0, 0, 0, 0)', padding: '10px', borderRadius: '5px' }}>
-                        <Typography variant="body1" sx={{ color: 'rgb(145, 0, 249)' }}>● Friendly Aircraft</Typography>
-                        <Typography variant="body1" sx={{ color: 'rgba(255, 0, 0, 1)' }}>● Your Aircraft</Typography>
+                        <Typography variant="body1" sx={{ color: 'rgb(145, 0, 249)' }}>● Friendly Vehicle</Typography>
+                        <Typography variant="body1" sx={{ color: 'rgba(255, 0, 0, 1)' }}>● Your Vehicle</Typography>
                         <Typography variant="body1" sx={{ color: 'rgb(0, 255, 0)' }}>● Your Tracks</Typography>
                         <Typography variant="body1" sx={{ color: 'rgb(54, 199, 210)' }}>● Friendly Tracks</Typography>
                     </Box>

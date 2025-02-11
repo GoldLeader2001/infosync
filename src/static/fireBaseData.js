@@ -17,25 +17,25 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 // Function to fetch all data from Firestore collection
-export async function fetchAircraftData() {
+export async function fetchVehicleData(faction) {
     try {
         const colRef = collection(db, "vehicles"); // Reference to the "vehicles" collection
         const querySnapshot = await getDocs(colRef);
+        console.log('This is a read')
 
         // Map through the documents and return their data
-        const aircraftData = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
+        const vehicleData = querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data()}))
+        .filter(doc => doc.faction === faction);
 
-        if (aircraftData.length > 0) {
-            //console.log("Aircraft data:", aircraftData);
-            return aircraftData; // Return all documents in the collection
+        if (vehicleData.length > 0) {
+            //console.log("vehicle data:", vehicleData);
+            return vehicleData; // Return all documents in the collection
         } else {
-            console.log("No aircraft data found!");
+            //console.log("No vehicle data found!");
             return [];
         }
     } catch (error) {
-        console.error("Error retrieving aircraft data: ", error);
+        console.error("Error retrieving vehicle data: ", error);
     }
 }
